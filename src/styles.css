@@ -18,6 +18,19 @@ form {
   margin: 0 auto;
 }
 
-select {
+label {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+select,
+input {
   width: 100%;
+  border: 1px solid #444;
+}
+
+fieldset {
+  margin: 0;
+  border: unset;
 }

@@ -1,18 +1,33 @@
 <script setup>
-defineProps({
+import { ref } from "vue";
+
+const props = defineProps({
   form: { type: Object, default: () => ({}) },
   name: { type: String, default: "value" },
   label: { type: String, default: "value" },
   itemName: { type: String, default: "value" },
   itemValue: { type: String, default: "value" },
   options: { type: Array, default: () => [] },
+  hasOthers: { type: Boolean, default: false },
 });
+
+const selectValue = ref(null);
+
+const handleChange = (e) => {
+  const val = e.target.value;
+  if (val != "") props.form[props.name] = selectValue.value;
+};
 </script>
 <template>
   <div>
     <label :for="name">
       <div>{{ label }}</div>
-      <select :id="name" v-model="form[name]" v-bind="$attrs">
+      <select
+        :id="name"
+        v-model="selectValue"
+        v-bind="$attrs"
+        @change="handleChange"
+      >
         <option
           v-for="option in options"
           :key="option[itemName]"
@@ -20,7 +35,9 @@ defineProps({
         >
           {{ option[itemValue] }}
         </option>
+        <option value="" v-if="hasOthers">Others</option>
       </select>
+      <input type="text" v-if="selectValue == ''" v-model="form[name]" />
     </label>
   </div>
 </template>
