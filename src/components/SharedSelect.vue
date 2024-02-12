@@ -19,7 +19,7 @@ const handleChange = (e) => {
 };
 </script>
 <template>
-  <div>
+  <div class="input-container">
     <label :for="name">
       <div>{{ label }}</div>
       <select
