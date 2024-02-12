@@ -1,19 +1,52 @@
 <script setup>
-import { ref } from "vue";
+import { ref, onMounted } from "vue";
 import data from "./data.js";
 import SharedSelect from "./components/SharedSelect.vue";
 import TableDate from "./components/TableDate.vue";
 
+const apiKey = "3%o8i}_;3D4bF]G5@22r2)Et1&mLJ4?$@+16";
 const submited = ref(false);
-const form = ref({
-  category: null,
-  subcategory: null,
-});
+const categories = ref([]);
+const subCategories = ref([]);
+const form = ref({});
 const tableData = ref([]);
+
+onMounted(async () => {
+  await getCategories();
+});
 
 const handleSubmit = () => {
   submited.value = true;
   tableData.value = Object.entries(form.value);
+};
+
+const getRequest = async (url) => {
+  try {
+    const res = await fetch(url, {
+      headers: {
+        "Content-Type": "application/json",
+        "private-key": apiKey,
+      },
+    });
+    const data = await res.json();
+    return data;
+  } catch (error) {
+    console.error("There was a problem with the fetch operation:", error);
+  }
+};
+
+const getCategories = async () => {
+  const res = await getRequest(
+    "https://staging.mazaady.com/api/v1/get_all_cats"
+  );
+  categories.value = res.data.categories;
+};
+
+const onSelectCategories = (event) => {
+  const children = categories.value.find(
+    (el) => el.name == event.target.value
+  ).children;
+  subCategories.value = children;
 };
 </script>
 
@@ -25,14 +58,15 @@ const handleSubmit = () => {
         :form="form"
         name="category"
         label="Main Category*"
-        :options="data"
+        :options="categories"
+        @change="onSelectCategories"
         required
       />
       <SharedSelect
         :form="form"
         name="subcategory"
         label="Sub category*"
-        :options="data"
+        :options="subCategories"
         required
         :disabled="!form.category"
       />

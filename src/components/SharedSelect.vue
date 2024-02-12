@@ -5,8 +5,8 @@ const props = defineProps({
   form: { type: Object, default: () => ({}) },
   name: { type: String, default: "value" },
   label: { type: String, default: "value" },
-  itemName: { type: String, default: "value" },
-  itemValue: { type: String, default: "value" },
+  itemName: { type: String, default: "name" },
+  itemValue: { type: String, default: "name" },
   options: { type: Array, default: () => [] },
   hasOthers: { type: Boolean, default: false },
 });
