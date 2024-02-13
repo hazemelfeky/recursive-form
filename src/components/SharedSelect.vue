@@ -11,7 +11,9 @@ const props = defineProps({
   hasOthers: { type: Boolean, default: false },
 });
 
-const selectValue = ref(null);
+const emit = defineEmits();
+
+const selectValue = ref({});
 
 const handleChange = (e) => {
   const val = e.target.value;
@@ -22,16 +24,11 @@ const handleChange = (e) => {
   <div class="input-container">
     <label :for="name">
       <div>{{ label }}</div>
-      <select
-        :id="name"
-        v-model="selectValue"
-        v-bind="$attrs"
-        @change="handleChange"
-      >
+      <select :id="name" v-model="selectValue" @change="handleChange">
         <option
           v-for="option in options"
           :key="option[itemName]"
-          :value="option[itemName]"
+          :value="option"
         >
           {{ option[itemValue] }}
         </option>
@@ -39,5 +36,15 @@ const handleChange = (e) => {
       </select>
       <input type="text" v-if="selectValue == ''" v-model="form[name]" />
     </label>
+    <SharedSelect
+      has-others
+      :form="form"
+      v-for="property in form[name]?.properties"
+      :key="property.id"
+      :name="property.slug"
+      :label="property.name"
+      :options="property.options"
+      @change="$emit('get-options-child')"
+    />
   </div>
 </template>

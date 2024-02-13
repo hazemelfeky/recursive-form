@@ -1,6 +1,5 @@
 <script setup>
 import { ref, onMounted } from "vue";
-import data from "./data.js";
 import SharedSelect from "./components/SharedSelect.vue";
 import TableDate from "./components/TableDate.vue";
 
@@ -10,6 +9,7 @@ const categories = ref([]);
 const subCategories = ref([]);
 const form = ref({});
 const tableData = ref([]);
+const properties = ref([]);
 
 onMounted(async () => {
   await getCategories();
@@ -18,7 +18,18 @@ onMounted(async () => {
 // Show table on submit
 const handleSubmit = () => {
   submited.value = true;
-  tableData.value = Object.entries(form.value);
+  const newObject = {};
+
+  for (const key in form.value) {
+    const value = form.value[key];
+    if (value && typeof value === "object") {
+      // Extract the 'name' property value if it exists
+      newObject[key] = value.name;
+    } else {
+      newObject[key] = value;
+    }
+  }
+  tableData.value = Object.entries(newObject);
 };
 
 // Global function to handle request
@@ -44,12 +55,43 @@ const getCategories = async () => {
   categories.value = res.data.categories;
 };
 
-const onSelectCategories = (event) => {
+const getProperties = async (id) => {
+  const res = await getRequest(
+    `https://staging.mazaady.com/api/v1/properties?cat=${id}`
+  );
+  return res.data;
+  // categories.value = res.data.categories;
+};
+
+const getOptionsChild = async (id) => {
+  // console.log("getOptionsChild");
+  const res = await getRequest(
+    `https://staging.mazaady.com/api/v1/get-options-child/${id}`
+  );
+  return res.data;
+  // categories.value = res.data.categories;
+};
+
+const onSelectCategories = () => {
   // Set subcategories options to children of main category
   const children = categories.value.find(
-    (el) => el.name == event.target.value
+    (el) => el.id == form.value.category.id
   ).children;
   subCategories.value = children;
+};
+
+const onSelectSubategories = async () => {
+  // Set subcategories options to children of main category
+  const id = form.value.subcategory.id;
+  const props = await getProperties(id);
+  properties.value = props;
+};
+
+const onSelectProperty = async (property) => {
+  // Get children properties of this property
+  const id = form.value[property.slug].id;
+  const res = await getOptionsChild(id);
+  form.value[property.slug].properties = res;
 };
 </script>
 
@@ -72,46 +114,18 @@ const onSelectCategories = (event) => {
         :options="subCategories"
         required
         :disabled="!form.category"
+        @change="onSelectSubategories"
       />
-      <fieldset v-if="form.subcategory">
-        <SharedSelect
-          :form="form"
-          name="process-type"
-          label="Process Type"
-          :options="data"
-          has-others
-        />
-        <SharedSelect
-          :form="form"
-          name="brand"
-          label="Brand"
-          :options="data"
-          has-others
-        />
-        <SharedSelect
-          :form="form"
-          name="model"
-          label="Model"
-          :options="data"
-          has-others
-          :disabled="!form.brand"
-        />
-        <SharedSelect
-          :form="form"
-          name="type"
-          label="Type"
-          :options="data"
-          has-others
-          :disabled="!form.model"
-        />
-        <SharedSelect
-          :form="form"
-          name="transmission"
-          label="Transmission Type"
-          :options="data"
-          has-others
-        />
-      </fieldset>
+      <SharedSelect
+        v-for="property in properties"
+        :key="property.id"
+        :form="form"
+        :name="property.slug"
+        :label="property.name"
+        :options="property.options"
+        @change="onSelectProperty(property, $event)"
+        has-others
+      />
       <button>Submit</button>
     </form>
     <div v-else>
