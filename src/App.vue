@@ -15,11 +15,13 @@ onMounted(async () => {
   await getCategories();
 });
 
+// Show table on submit
 const handleSubmit = () => {
   submited.value = true;
   tableData.value = Object.entries(form.value);
 };
 
+// Global function to handle request
 const getRequest = async (url) => {
   try {
     const res = await fetch(url, {
@@ -43,6 +45,7 @@ const getCategories = async () => {
 };
 
 const onSelectCategories = (event) => {
+  // Set subcategories options to children of main category
   const children = categories.value.find(
     (el) => el.name == event.target.value
   ).children;
